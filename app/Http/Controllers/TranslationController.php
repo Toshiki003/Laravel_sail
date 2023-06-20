@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class TranslationController extends Controller
 {
@@ -39,10 +40,22 @@ class TranslationController extends Controller
         // $_POSTは、HTTPリクエストのPOSTメソッドで送信されたデータを取得するためのスーパーグローバル変数。ちょっとまだよくわからない。
         // Rubyでは、params[:sentence]と書く。この方が今は理解がしっくりくる。
 
-        // TODO: 翻訳処理を実装する
+        // 翻訳処理
+        $response = Http::get(
+            // 無料版URL
+            'https://api-free.deepl.com/v2/translate',
+            // GETパラメータ
+            [
+                'auth_key' => env('DEEPL_AUTH_KEY'),
+                'text' => $sentence,
+                'target_lang' => 'EN-US',
+            ]
+            );
+        // 翻訳結果
+        $translated_text = $response->json('translations')[0]['text'];
         
         // 翻訳結果をViewに渡す
-        return view('translation', compact('sentence'));
+        return view('translation', compact('sentence', 'translated_text'));
 
         // Laravelはバリデーションをモデルではなく、コントローラーで行うことが多い
         // Railsよりもファットコントローラになりやすいのかな？
